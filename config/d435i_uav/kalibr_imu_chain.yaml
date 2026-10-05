@@ -1,0 +1,47 @@
+%YAML:1.0
+# Conservative OpenVINS runtime noise model for D435i serial 213622077237.
+# Source bag:
+#   /home/uav/imu_calibration/d435i_imu_static_20h_stable_20260925
+# Recording: 20 h at 200 Hz; first 10 minutes excluded from analysis.
+#
+# White-noise densities are the measured worst-axis values multiplied by 2
+# to account for vibration and other unmodelled effects on the UAV.
+# Accelerometer random walk is a conservative Allan-minimum estimate.
+# Gyroscope random walk is 10x the largest valid long-run fit (gyro X:
+# 2.40379017002e-6 rad/s^2/sqrt(Hz)). Gyro Z has no identifiable +1/2
+# random-walk region, so its raw fit is deliberately not used.
+
+imu0:
+  T_i_b:
+    - [1.0, 0.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0, 0.0]
+    - [0.0, 0.0, 1.0, 0.0]
+    - [0.0, 0.0, 0.0, 1.0]
+  accelerometer_noise_density: 0.00550072631504
+  accelerometer_random_walk: 0.0009
+  gyroscope_noise_density: 0.00048348241222
+  gyroscope_random_walk: 0.0000240379017002
+  rostopic: /camera/camera/imu
+  time_offset: 0.0
+  update_rate: 200.0
+  model: "kalibr"
+  Tw:
+    - [1.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0]
+    - [0.0, 0.0, 1.0]
+  R_IMUtoGYRO:
+    - [1.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0]
+    - [0.0, 0.0, 1.0]
+  Ta:
+    - [1.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0]
+    - [0.0, 0.0, 1.0]
+  R_IMUtoACC:
+    - [1.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0]
+    - [0.0, 0.0, 1.0]
+  Tg:
+    - [0.0, 0.0, 0.0]
+    - [0.0, 0.0, 0.0]
+    - [0.0, 0.0, 0.0]

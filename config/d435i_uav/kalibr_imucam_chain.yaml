@@ -1,0 +1,64 @@
+%YAML:1.0
+# Ground-experiment calibration for D435i serial 213622077237.
+# Read from the device factory calibration with rs-enumerate-devices -c
+# on 2026-09-18 for the 640x480 Y8 infrared streams.
+# Replace with a Kalibr camera-IMU result before flight validation.
+
+cam0:
+  # Factory transform Infrared 1 -> Gyro/Accel (camera -> IMU).
+  T_imu_cam:
+    - [1.0, 0.0, 0.0, -0.00552000012248755]
+    - [0.0, 1.0, 0.0,  0.00510000018402934]
+    - [0.0, 0.0, 1.0,  0.01173999998718500]
+    - [0.0, 0.0, 0.0,  1.0]
+
+  cam_overlaps: [1]
+
+  camera_model: pinhole
+
+  # image_rect_raw is already rectified
+  distortion_model: radtan
+  distortion_coeffs: [0.0, 0.0, 0.0, 0.0]
+
+  # fx, fy, cx, cy
+  intrinsics:
+    [387.5249938964844,
+     387.5249938964844,
+     321.5939025878906,
+     237.82276916503906]
+
+  resolution: [640, 480]
+
+  rostopic: /camera/camera/infra1/image_rect_raw
+
+  # Initial value. Will be calibrated/verified later.
+  timeshift_cam_imu: 0.0
+
+
+cam1:
+  # Factory transform Infrared 2 -> Gyro/Accel (camera -> IMU).
+  T_imu_cam:
+    - [1.0, 0.0, 0.0,  0.04475471004843710]
+    - [0.0, 1.0, 0.0,  0.00510000018402934]
+    - [0.0, 0.0, 1.0,  0.01173999998718500]
+    - [0.0, 0.0, 0.0,  1.0]
+
+  cam_overlaps: [0]
+
+  camera_model: pinhole
+
+  # image_rect_raw is already rectified
+  distortion_model: radtan
+  distortion_coeffs: [0.0, 0.0, 0.0, 0.0]
+
+  intrinsics:
+    [387.5249938964844,
+     387.5249938964844,
+     321.5939025878906,
+     237.82276916503906]
+
+  resolution: [640, 480]
+
+  rostopic: /camera/camera/infra2/image_rect_raw
+
+  timeshift_cam_imu: 0.0
