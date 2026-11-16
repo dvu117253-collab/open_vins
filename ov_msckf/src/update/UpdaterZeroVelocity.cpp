@@ -106,6 +106,31 @@ bool UpdaterZeroVelocity::try_update(std::shared_ptr<State> state, double timest
     return false;
   }
 
+  // Only use IMU data that really covers [time0, time1]. select_imu_readings() extrapolates past the
+  // newest sample and interpolates across dropouts; such stretched readings are not measurements of
+  // the platform at rest, and updating on them corrupted the covariance (negative diagonal, then
+  // std::exit) when the D435i IMU stream had gaps (replay with 1 s dropouts, 2026-11-16).
+  const double max_imu_gap = 0.05;
+  if (imu_data.front().timestamp > time0 || imu_data.back().timestamp < time1) {
+    PRINT_DEBUG(YELLOW "[ZUPT]: IMU does not cover the update interval, skipping\n" RESET);
+    last_zupt_state_timestamp = 0.0;
+    last_zupt_count = 0;
+    return false;
+  }
+  for (size_t i = 0; i + 1 < imu_data.size(); i++) {
+    if (imu_data.at(i + 1).timestamp < time0)
+      continue;
+    if (imu_data.at(i).timestamp > time1)
+      break;
+    if (imu_data.at(i + 1).timestamp - imu_data.at(i).timestamp > max_imu_gap) {
+      PRINT_WARNING(YELLOW "[ZUPT]: IMU gap of %.3f s in the update interval, skipping\n" RESET,
+                    imu_data.at(i + 1).timestamp - imu_data.at(i).timestamp);
+      last_zupt_state_timestamp = 0.0;
+      last_zupt_count = 0;
+      return false;
+    }
+  }
+
   // If we should integrate the acceleration and say the velocity should be zero
   // Also if we should still inflate the bias based on their random walk noises
   bool integrated_accel_constraint = false; // untested
@@ -177,6 +202,14 @@ bool UpdaterZeroVelocity::try_update(std::shared_ptr<State> state, double timest
       H.block(6 * i + 3, 9, 3, 3) = w_accel_v * Eigen::Matrix3d::Identity();
     }
     dt_summed += dt;
+  }
+
+  // Never update on a non-finite system
+  if (!H.allFinite() || !res.allFinite()) {
+    PRINT_WARNING(YELLOW "[ZUPT]: non-finite residual or Jacobian, skipping\n" RESET);
+    last_zupt_state_timestamp = 0.0;
+    last_zupt_count = 0;
+    return false;
   }
 
   // Compress the system (we should be over determined)
