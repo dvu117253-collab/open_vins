@@ -228,6 +228,9 @@ void VioManager::feed_measurement_simulation(double timestamp, const std::vector
       propagator->clean_old_imu_measurements(timestamp + state->_calib_dt_CAMtoIMU->value()(0) - 0.10);
       updaterZUPT->clean_old_imu_measurements(timestamp + state->_calib_dt_CAMtoIMU->value()(0) - 0.10);
       propagator->invalidate_cache();
+      // A zero-velocity update is a state update: count it, so initialized() (and the ROS
+      // outputs) do not wait for the first visual update, i.e. for the platform to move.
+      timelastupdate = timestamp;
       return;
     }
   }
@@ -301,6 +304,11 @@ void VioManager::track_image_and_update(const ov_core::CameraData &message_const
       propagator->clean_old_imu_measurements(message.timestamp + state->_calib_dt_CAMtoIMU->value()(0) - 0.10);
       updaterZUPT->clean_old_imu_measurements(message.timestamp + state->_calib_dt_CAMtoIMU->value()(0) - 0.10);
       propagator->invalidate_cache();
+      // A zero-velocity update is a state update: count it, so initialized() (and the ROS
+      // outputs) do not wait for the first visual update, i.e. for the platform to move.
+      // Without this a vehicle that initialises at rest (try_zupt) publishes no odometry
+      // until it moves, so an EV-dependent take-off deadlocks.
+      timelastupdate = message.timestamp;
       return;
     }
   }
